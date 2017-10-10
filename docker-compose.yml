@@ -1,0 +1,41 @@
+version: "2"
+
+services:
+    nginx:
+        container_name: nginx_proxy
+        image: nginx:1.13
+        volumes:
+            - ./nginx/ssl:/etc/nginx/ssl
+            - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
+        ports:
+            - "80:80"
+            - "443:443"
+        links:
+            - ghost
+        restart: always
+
+    ghost:
+        container_name: ghost_blog
+        image: ghost:1.8.7
+        volumes:
+            - ./ghost/content:/var/lib/ghost/content
+            - ./ghost/config.production.json:/var/lib/ghost/config.production.json
+        depends_on:
+            - mysql
+        expose:
+            - "2368"
+        environment:
+            - NODE_ENV=production
+        restart: always
+
+    mysql:
+        container_name: blog_data
+        image: mysql:5.7.15
+        expose:
+            - "3306"
+        environment:
+            - MYSQL_ROOT_PASSWORD=databaseRootPassword
+            - MYSQL_DATABASE=ghost
+            - MYSQL_USER=ghostUser
+            - MYSQL_PASSWORD=databasePassword
+        restart: always
